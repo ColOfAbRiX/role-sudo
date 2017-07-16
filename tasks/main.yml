@@ -1,0 +1,90 @@
+---
+# # # # #  Sudo  # # # # #
+
+- name: "Require Correct Linux Distribution"
+  assert:
+    that: ansible_distribution | lower in ['redhat', 'centos']
+    msg:  "This Linux distrution is not supported by the role."
+  tags: sudo
+
+- name: "Safety Sudoers Job"
+  cron:
+    name:   sudo-safety-0
+    minute: '*/15'
+    state:  "{{ sudo_safety_state | default('present') }}"
+    user:   root
+    job:    "[ -f /etc/sudoers.safe ] && install --preserve-context -m 440 /etc/sudoers.safe /etc/sudoers"
+  tags: sudo
+
+- name: "Configuration Files"
+  template:
+    src:    "etc/{{ item }}.j2"
+    dest:   "/etc/{{ item }}"
+    owner:  root
+    group:  root
+    mode:   '0440'
+    force:  yes
+    seuser: system_u
+    serole: object_r
+    setype: etc_t
+  with_items:
+   - sudoers
+   - sudo-ldap.conf
+  tags: sudo
+
+- name: "Safety Sudoers.d Job"
+  cron:
+    name:   sudo-safety-1
+    minute: '*/15'
+    state:  "{{ sudo_safety_state | default('present') }}"
+    user:   root
+    job:    "[ -d /etc/sudoers.d.safe ] && mkdir -p /etc/sudoers.d && rsync -apcI /etc/sudoers.d.safe/* /etc/sudoers.d/"
+  tags: sudo
+
+- name: "Add Specific Sudoers Configuration"
+  template:
+    src:    "etc/sudoers.d/generic.j2"
+    dest:   "/etc/sudoers.d/{{ sudoers_d_item.name }}"
+    owner:  root
+    group:  root
+    mode:   '0440'
+    force:  yes
+    seuser: system_u
+    serole: object_r
+    setype: etc_t
+  when: sudoers_d_item.state | default('present') == 'present'
+  with_items:
+   - "{{ sudoers_sudoers_d }}"
+  loop_control:
+    loop_var: sudoers_d_item
+  tags: sudo
+
+- name: "Remove Specific Sudoers Configuration"
+  file: path="/etc/sudoers.d/{{ item.name }}" state=absent
+  when: item.state | default('present') == 'absent'
+  with_items:
+   - "{{ sudoers_sudoers_d }}"
+  tags: sudo
+
+
+- name: "Fix SUDO DB permissions"
+  file: path=/var/db/sudo recurse=yes owner=root
+  tags: sudo
+
+- name: "Add Safety Sudo File"
+  shell: cp -fR --preserve=mode,ownership,timestamps,context /etc/sudoers /etc/sudoers.safe
+  when: sudo_safety_state | default('present') == 'present'
+  tags: sudo
+
+- name: "Add Safety Sudo Directory"
+  shell: cp -fR --preserve=mode,ownership,timestamps,context /etc/sudoers.d /etc/sudoers.d.safe
+  when: sudo_safety_state | default('present') == 'present'
+  tags: sudo
+
+- name: "Remove Safety Sudo Files"
+  file: path="/etc/{{ item }}" state=absent
+  when: sudo_safety_state | default('present') == 'absent'
+  with_items:
+   - sudoers.safe
+   - sudoers.d.safe
+  tags: sudo

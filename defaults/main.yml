@@ -1,0 +1,309 @@
+---
+# If set to present, it will create a safety copy-and-replace of the configuration
+sudo_safety_enabled: present
+
+# If 'present' it will create a safety system that replaces wrong sudo files
+sudo_safety_state: 'present'
+
+# Host aliases to add into /etc/sudoers
+sudoers_host_aliases: []
+
+# User aliases to add into /etc/sudoers
+sudoers_user_aliases: []
+
+# Command aliases to add into /etc/sudoers
+sudoers_cmnd_aliases:
+ - name: SU
+   commands:
+    - /usr/bin/su
+ - name: SHELLS
+   commands:
+    - /usr/bin/bash
+    - /usr/bin/sh
+    - /usr/bin/csh
+    - /usr/bin/ksh
+    - /usr/local/bin/tcsh
+    - /usr/bin/rsh
+    - /usr/local/bin/zsh
+    - /bin/bash
+    - /bin/sh
+    - /bin/csh
+    - /bin/ksh
+    - /bin/tcsh
+    - /bin/rsh
+    - /bin/zsh
+
+# Aliases to add into /etc/sudoers
+sudoers_defaults:
+  #
+  # Disable "ssh hostname sudo <cmd>", because it will show the password in clear.
+  #         You have to run "ssh -t hostname sudo <cmd>".
+  #
+ - option: 'requiretty'
+ - option: '!requiretty'
+   user:   root
+
+  #
+  # Refuse to run if unable to disable echo on the tty. This setting should also be
+  # changed in order to be able to use sudo without a tty. See requiretty above.
+  #
+ - option: '!visiblepw'
+
+  #
+  # Preserving HOME has security implications since many programs
+  # use it when searching for configuration files. Note that HOME
+  # is already set when the the env_reset option is enabled, so
+  # this option is only effective for configurations where either
+  # env_reset is disabled or HOME is present in the env_keep list.
+  #
+ - option: 'always_set_home'
+
+  #
+  # Default timeout for sudo password extended to 10 minutes
+  #
+ - option: 'timestamp_timeout=10'
+
+ - option: 'secure_path = /sbin:/bin:/usr/sbin:/usr/bin'
+ - option: 'env_reset'
+ - option: 'env_keep = "COLORS DISPLAY HOSTNAME HISTSIZE INPUTRC KDEDIR LS_COLORS"'
+ - option: 'env_keep += "MAIL PS1 PS2 QTDIR USERNAME LANG LC_ADDRESS LC_CTYPE"'
+ - option: 'env_keep += "LC_COLLATE LC_IDENTIFICATION LC_MEASUREMENT LC_MESSAGES"'
+ - option: 'env_keep += "LC_MONETARY LC_NAME LC_NUMERIC LC_PAPER LC_TELEPHONE"'
+ - option: 'env_keep += "LC_TIME LC_ALL LANGUAGE LINGUAS _XKB_CHARSET XAUTHORITY"'
+
+  #
+  # Adding HOME to env_keep may enable a user to run unrestricted
+  # commands via sudo.
+  #
+  #- option: 'env_keep += "HOME"'
+
+ - option: '!requiretty'
+   user:  "{{ ansible_common_user }}"
+
+
+# The custom entries to put into /etc/sudoers
+sudoers_entries:
+   ## Allow root to run any commands anywhere, always
+   - who:      root
+     as_who:   [ALL]
+     commands: [ALL]
+
+   ## Give Ansible user full permissions
+   - who:      "{{ ansible_common_user }}"
+     as_who:   [ALL]
+     commands: [ALL]
+
+   ## Allows people in group wheel to run all commands, except for root shells
+   - who:      '%wheel'
+     as_who:   [root]
+     commands:
+      - 'ALL'
+      - '!SHELLS'
+      - '!SU'
+   - who:      '%wheel'
+     as_who:   [ALL, '!root']
+     commands:
+      - 'ALL'
+
+
+# Custom files into /etc/sudoers.d
+sudoers_sudoers_d: []
+
+#
+# /etc/sudo-ldap.conf
+#
+
+# Specifies a whitespace-delimited list of one or more URIs describing the LDAP
+# server(s) to connect to.  The protocol may be either ldap ldaps, the latter
+# being for servers that support TLS (SSL) encryption.  If no port is specified,
+# the default is port 389 for ldap:// or port 636 for ldaps://.  If no hostname
+# is specified, sudo will connect to localhost.  Multiple URI lines are treated
+# identically to a URI line containing multiple entries.  Only systems using the
+# OpenSSL libraries support the mixing of ldap:// and ldaps:// URIs.  Both the
+# Netscape-derived and Tivoli LDAP libraries used on most commercial versions of
+# Unix are only capable of sup‐ porting one or the other.
+#sudo_ldap_conf_uri: []
+
+# If no URI is specified, the HOST parameter specifies a whitespace-delimited
+# list of LDAP servers to connect to.  Each host may include an optional port
+# separated by a colon (‘:’).  The HOST parameter is deprecated in favor of the
+# URI specification and is included for backwards compatibility.
+#sudo_ldap_conf_host: []
+
+# If no URI is specified, the PORT parameter specifies the default port to
+# connect to on the LDAP server if a HOST parameter does not specify the port
+# itself.  If no PORT parameter is used, the default is port 389 for LDAP and
+# port 636 for LDAP over TLS (SSL).  The PORT parameter is deprecated in favor
+# of the URI specification and is included for backwards compatibility.
+#sudo_ldap_conf_port: 389
+
+# The BIND_TIMELIMIT parameter specifies the amount of time, in seconds, to wait
+# while trying to connect to an LDAP server.  If multiple URIs or HOSTs are
+# specified, this is the amount of time to wait before trying the next one in
+# the list.
+#sudo_ldap_conf_bind_timelimit: 30
+
+# An alias for BIND_TIMELIMIT for OpenLDAP compatibility.
+#sudo_ldap_conf_network_timeout: 30
+
+# The TIMELIMIT parameter specifies the amount of time, in seconds, to wait for
+# a response to an LDAP query.
+#sudo_ldap_conf_timelimit: 30
+
+# The TIMEOUT parameter specifies the amount of time, in seconds, to wait for a
+# response from the various LDAP APIs.
+#sudo_ldap_conf_timeout: 30
+
+# The base DN to use when performing sudo LDAP queries.  Typically this is of
+# the form ou=SUDOers,dc=example,dc=com for the domain example.com.  Multiple
+# SUDOERS_BASE lines may be specified, in which case they are queried in the
+# order specified.
+#sudo_ldap_conf_sudoers_base: base
+
+# An LDAP filter which is used to restrict the set of records returned when
+# performing a sudo LDAP query.  Typically, this is of the form attribute=value
+# or (&(attribute=value)(attribute2=value2)).
+#sudo_ldap_conf_sudoers_search_filter: ldap_filter
+
+# Whether or not to evaluate the sudoNotBefore and sudoNotAfter attributes that
+# implement time-dependent sudoers entries.
+#sudo_ldap_conf_sudoers_timed: on/true/yes/off/false/no
+
+# This sets the debug level for sudo LDAP queries.  Debugging information is
+# printed to the standard error.  A value of 1 results in a moderate amount of
+# debugging information.  A value of 2 shows the results of the matches
+# themselves.  This parameter should not be set in a production environment as
+# the extra information is likely to confuse users.
+#sudo_ldap_conf_sudoers_debug: debug_level
+
+# The BINDDN parameter specifies the identity, in the form of a Distinguished
+# Name (DN), to use when performing LDAP operations.  If not specified, LDAP
+# operations are performed with an anonymous identity.  By default, most LDAP
+# servers will allow anonymous access.
+#sudo_ldap_conf_binddn: DN
+
+# The BINDPW parameter specifies the password to use when performing LDAP
+# operations.  This is typically used in conjunction with the BINDDN parameter.
+#sudo_ldap_conf_bindpw: secret
+
+# The ROOTBINDDN parameter specifies the identity, in the form of a
+# Distinguished Name (DN), to use when performing privileged LDAP operations,
+# such as sudoers queries.  The password corresponding to the identity should be
+# stored in /etc/ldap.secret.  If not specified, the BINDDN identity is used (if
+# any).
+#sudo_ldap_conf_rootbinddn: DN
+
+# The version of the LDAP protocol to use when connecting to the server.  The
+# default value is protocol version 3.
+#sudo_ldap_conf_ldap_version: number
+
+# If the SSL parameter is set to on, true or yes, TLS (SSL) encryption is always
+# used when communicating with the LDAP server.  Typically, this involves
+# connecting to the server on port 636 (ldaps).
+#sudo_ldap_conf_ssl: on/true/yes/off/false/no
+
+# If the SSL parameter is set to start_tls, the LDAP server connection is
+# initiated normally and TLS encryption is begun before the bind credentials are
+# sent.  This has the advantage of not requiring a dedicated port for encrypted
+# communications.  This parameter is only supported by LDAP servers that honor
+# the start_tls extension, such as the OpenLDAP and Tivoli Directory servers.
+#sudo_ldap_conf_ssl: start_tls
+
+# If enabled, TLS_CHECKPEER will cause the LDAP server's TLS certificated to be
+# verified.  If the server's TLS certificate cannot be verified (usually because
+# it is signed by an unknown certificate authority), sudo will be unable to
+# connect to it.  If TLS_CHECKPEER is disabled, no check is made.  Note that
+# disabling the check creates an opportunity for man-in-the-middle attacks since
+# the server's identity will not be authenticated.  If possible, the CA's
+# certificate should be installed locally so it can be verified.  This option is
+# not supported by the Tivoli Directory Server LDAP libraries.
+#sudo_ldap_conf_tls_checkpeer: on/true/yes/off/false/no
+
+# An alias for TLS_CACERTFILE for OpenLDAP compatibility.
+#sudo_ldap_conf_tls_cacert: file name
+
+# The path to a certificate authority bundle which contains the certificates for
+# all the Certificate Authorities the client knows to be valid, e.g. /etc/ssl
+# /ca-bundle.pem.  This option is only supported by the OpenLDAP libraries.
+# Netscape-derived LDAP libraries use the same certificate database for CA and
+# client certificates (see TLS_CERT).
+#sudo_ldap_conf_tls_cacertfile: file name
+
+# Similar to TLS_CACERTFILE but instead of a file, it is a directory containing
+# individual Certificate Authority certificates, e.g. /etc/ssl/certs.  The
+# directory specified by TLS_CACERTDIR is checked after TLS_CACERTFILE.  This
+# option is only supported by the OpenLDAP libraries.
+#sudo_ldap_conf_tls_cacertdir: directory
+
+# The path to a file containing the client certificate which can be used to
+# authenticate the client to the LDAP server.  The certificate type depends on
+# the LDAP libraries used.
+# OpenLDAP:
+#       tls_cert /etc/ssl/client_cert.pem
+# Netscape-derived:
+#       tls_cert /var/ldap/cert7.db
+# Tivoli Directory Server:
+#       Unused, the key database specified by TLS_KEY contains both keys and
+#       certificates.
+#       When using Netscape-derived libraries, this file may also contain
+#       Certificate Authority certificates.
+#sudo_ldap_conf_tls_cert: file name
+
+# The path to a file containing the private key which matches the certificate
+# specified by TLS_CERT.  The private key must not be password-protected.  The
+# key type depends on the LDAP libraries used.
+# OpenLDAP:
+#       tls_key /etc/ssl/client_key.pem
+# Netscape-derived:
+#       tls_key /var/ldap/key3.db
+# Tivoli Directory Server:
+#       tls_cert /usr/ldap/ldapkey.kdb
+# When using Tivoli LDAP libraries, this file may also contain Certificate
+# Authority and client certificates and may be encrypted.
+#sudo_ldap_conf_tls_key: file name
+
+# The TLS_KEYPW contains the password used to decrypt the key database on
+# clients using the Tivoli Directory Server LDAP library.  If no TLS_KEYPW is
+# specified, a stash file will be used if it exists.  The stash file must have
+# the same path as the file specified by TLS_KEY, but use a .sth file extension
+# instead of .kdb, e.g. ldapkey.sth.  The default ldapkey.kdb that ships with
+# Tivoli Directory Server is encrypted with the password ssl_password.  This
+# option is only supported by the Tivoli LDAP libraries.
+#sudo_ldap_conf_tls_keypw: secret
+
+# The TLS_RANDFILE parameter specifies the path to an entropy source for systems
+# that lack a random device.  It is generally used in conjunction with prngd or
+# egd.  This option is only supported by the OpenLDAP libraries.
+#sudo_ldap_conf_tls_randfile: file name
+
+# The TLS_CIPHERS parameter allows the administer to restrict which encryption
+# algorithms may be used for TLS (SSL) connections.  See the OpenLDAP or Tivoli
+# Directory Server manual for a list of valid ciphers.  This option is not
+# supported by Netscape-derived libraries.
+#sudo_ldap_conf_tls_ciphers: cipher list
+
+# Enable USE_SASL for LDAP servers that support SASL authentication.
+#sudo_ldap_conf_use_sasl: on/true/yes/off/false/no
+
+# The SASL user name to use when connecting to the LDAP server.  By default,
+# sudo will use an anonymous connection.
+#sudo_ldap_conf_sasl_auth_id: identity
+
+# Enable ROOTUSE_SASL to enable SASL authentication when connecting to an LDAP
+# server from a privileged process, such as sudo.
+#sudo_ldap_conf_rootuse_sasl: on/true/yes/off/false/no
+
+# The SASL user name to use when ROOTUSE_SASL is enabled.
+#sudo_ldap_conf_rootsasl_auth_id: identity
+
+# SASL security properties or none for no properties.  See the SASL programmer's
+# manual for details.
+#sudo_ldap_conf_sasl_secprops: none/properties
+
+# The path to the Kerberos 5 credential cache to use when authenticating with
+# the remote server.
+#sudo_ldap_conf_krb5_ccname: file name
+
+# How alias dereferencing is to be performed when searching.  See the
+# ldap.conf(8) manual for a full description of this option.
+#sudo_ldap_conf_deref: never/searching/finding/always
