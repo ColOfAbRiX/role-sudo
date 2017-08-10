@@ -16,6 +16,7 @@
     job:    "[ -f /etc/sudoers.safe ] && install --preserve-context -m 440 /etc/sudoers.safe /etc/sudoers"
   tags: sudo
 
+
 - name: "Configuration Files"
   template:
     src:    "etc/{{ item }}.j2"
