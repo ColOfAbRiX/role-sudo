@@ -13,9 +13,9 @@
     minute: '*/15'
     state:  "{{ sudo_safety_state | default('present') }}"
     user:   root
-    job:    "[ -f /etc/sudoers.safe ] && install --preserve-context -m 440 /etc/sudoers.safe /etc/sudoers"
+    job:    "[ -f {{ sudo_safe_file }} ] && tar -xvpzf {{ sudo_safe_file }} -C /"
+    cron_file: sudo_safety
   tags: sudo
-
 
 - name: "Configuration Files"
   template:
@@ -31,15 +31,6 @@
   with_items:
    - sudoers
    - sudo-ldap.conf
-  tags: sudo
-
-- name: "Safety Sudoers.d Job"
-  cron:
-    name:   sudo-safety-1
-    minute: '*/15'
-    state:  "{{ sudo_safety_state | default('present') }}"
-    user:   root
-    job:    "[ -d /etc/sudoers.d.safe ] && mkdir -p /etc/sudoers.d && rsync -apcI /etc/sudoers.d.safe/* /etc/sudoers.d/"
   tags: sudo
 
 - name: "Add Specific Sudoers Configuration"
@@ -73,19 +64,11 @@
   tags: sudo
 
 - name: "Add Safety Sudo File"
-  shell: cp -fR --preserve=mode,ownership,timestamps,context /etc/sudoers /etc/sudoers.safe
-  when: sudo_safety_state | default('present') == 'present'
-  tags: sudo
-
-- name: "Add Safety Sudo Directory"
-  shell: cp -fR --preserve=mode,ownership,timestamps,context /etc/sudoers.d /etc/sudoers.d.safe
+  shell: tar -cvpzf {{ sudo_safe_file }} --exclude={{ sudo_safe_file }} --one-file-system /etc/sudoers /etc/sudoers.d
   when: sudo_safety_state | default('present') == 'present'
   tags: sudo
 
 - name: "Remove Safety Sudo Files"
-  file: path="/etc/{{ item }}" state=absent
+  file: path="{{ sudo_safe_file }}" state=absent
   when: sudo_safety_state | default('present') == 'absent'
-  with_items:
-   - sudoers.safe
-   - sudoers.d.safe
   tags: sudo

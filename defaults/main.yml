@@ -5,6 +5,9 @@ sudo_safety_enabled: present
 # If 'present' it will create a safety system that replaces wrong sudo files
 sudo_safety_state: 'present'
 
+# Name of the backup file
+sudo_safe_file: /etc/sudo-safe.tar.gz
+
 # Host aliases to add into /etc/sudoers
 sudoers_host_aliases: []
 
