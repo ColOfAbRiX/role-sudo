@@ -19,7 +19,7 @@ Defaults{% if item.user is defined %}:{{ item.user.ljust(15) }}{% endif %} {{ it
 ## Host Aliases
 {% for item in sudoers_host_aliases | default([]) %}
 # {{ item.name }}
-Host_Alias {{ item.name }} = {{ item.host | join(', ') }}
+Host_Alias {{ item.name }} = {{ item.hosts | join(', ') }}
 {% endfor %}
 
 

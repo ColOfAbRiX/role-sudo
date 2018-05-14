@@ -1,7 +1,4 @@
 ---
-# If set to present, it will create a safety copy-and-replace of the configuration
-sudo_safety_enabled: present
-
 # If 'present' it will create a safety system that replaces wrong sudo files
 sudo_safety_state: 'present'
 
@@ -10,9 +7,13 @@ sudo_safe_file: /etc/sudo-safe.tar.gz
 
 # Host aliases to add into /etc/sudoers
 sudoers_host_aliases: []
+# - name: PRODUCTION
+#   hosts: [vmweb01, vmweb02]
 
 # User aliases to add into /etc/sudoers
 sudoers_user_aliases: []
+# - name: ADMINISTRATORS
+#   hosts: [fabrizio, luis]
 
 # Command aliases to add into /etc/sudoers
 sudoers_cmnd_aliases:
@@ -36,7 +37,7 @@ sudoers_cmnd_aliases:
     - /bin/rsh
     - /bin/zsh
 
-# Aliases to add into /etc/sudoers
+# Defaults to add into /etc/sudoers
 sudoers_defaults:
   #
   # Disable "ssh hostname sudo <cmd>", because it will show the password in clear.
@@ -111,6 +112,21 @@ sudoers_entries:
 
 # Custom files into /etc/sudoers.d
 sudoers_sudoers_d: []
+# # Name of the file
+# - name: developers
+#   # State
+#   state: present
+#   # Same variable names of the root role configuration
+#   sudoers_cmnd_aliases:
+#    - name: DATABASE
+#      commands:
+#       - /usr/bin/database start
+#       - /usr/bin/database stop
+#   sudoers_entries:
+#    - who: '%developers'
+#      as_who: [ dbuser ]
+#      commands: [ ALL ]
+#      options: NOPASSWD
 
 #
 # /etc/sudo-ldap.conf
