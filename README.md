@@ -17,7 +17,6 @@ The role requires RHEL/CentOS 7 to work.
 The variables are fully documented in the [default configuration](defaults/main.yml) file, including their default values and some examples. This file contains all the settings that can be configured.
 
 Please refer to the default configuration file for the full list and use Linux man pages if you need more information on Sudo.
-For the configuration of SUDO-LDAP there is a set of variables prefixed by `sudo_ldap_*` that expose the configuration file /etc/sudo-ldap.conf. Refer to `man sudo-ldap.conf` for the full description of the variables.
 
 | Variable               | Default                 | Description                                  |
 | :---                   | :---                    | :---                                         |
@@ -31,32 +30,53 @@ For the configuration of SUDO-LDAP there is a set of variables prefixed by `sudo
 | `sudoers_sudoers_d`    | `[]`                    | Custom files into /etc/sudoers.d.            |
 | `sudo_ldap_*`          |                         | Set of variables to configure SUDO-LDAP. See `man sudo-ldap.conf` |
 
+### Custom sudoers file
+
+The `sudoers_sudoers_d` variable contains the configuration for additional sudoers files placed under `/etc/sudoers.d`.
+
+The variable is a list where each element can contain the same `sudoers_*` variables. The following is an example of a custom sudo file:
+
+```Yaml
+sudoers_sudoers_d:
+ # Name of the /etc/sudoers.d/ file
+ - name: developers
+   state: present
+   # Same variable names of the root role configuration
+   sudoers_cmnd_aliases:
+    - name: DATABASE
+      commands: [ /usr/bin/database start, /usr/bin/database stop ]
+   sudoers_entries:
+    - who: '%developers'
+      as_who: [ database_user ]
+      commands: [ ALL ]
+      options: NOPASSWD
+```
+
+### Additional configuration values
+
+Each `sudoers_*` variable has a partner variable named `sudoers_custom_*` that is added to it. This allows to maintain a global configuration while still be able to add global customizations.
+
+### SUDO-LDAP
+
+For the configuration of SUDO-LDAP there is a set of variables prefixed by `sudo_ldap_*` that expose the configuration file /etc/sudo-ldap.conf.
+
+Refer to `man sudo-ldap.conf` for the full description of the variables.
+
 ## Example Playbook
 
 Using the role without any specific configuration is very simple, it's enough to include the role.
 
-The following example shows how to create a custom configuration for a group *developers* that needs to start and stop a database:
+The following example shows how to allow the group *developers* to run commands as *root*:
 
 ```Yaml
 - hosts: servers
   roles:
    - role: sudo
-     sudoers_sudoers_d:
-      # Name of the /etc/sudoers.d/ file
-      - name: developers
-        # State
-        state: present
-        # Same variable names of the root role configuration
-        sudoers_cmnd_aliases:
-         - name: DATABASE
-           commands:
-            - /usr/bin/database start
-            - /usr/bin/database stop
-        sudoers_entries:
-         - who: '%developers'
-           as_who: [ database_user ]
-           commands: [ ALL ]
-           options: NOPASSWD
+     sudoers_entries:
+      - who: '%developers'
+        as_who: [ root ]
+        commands: [ ALL ]
+        options: NOPASSWD
 ```
 
 ## License

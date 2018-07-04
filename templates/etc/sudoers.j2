@@ -11,27 +11,37 @@
 
 
 ## Defaults specification
-{% for item in sudoers_defaults | default([]) %}
-Defaults{% if item.user is defined %}:{{ item.user.ljust(15) }}{% endif %} {{ item.option }}
+{% for item in sudoers_defaults | default([]) + sudoers_custom_defaults | default([]) %}
+{% if item.user is defined %}
+Defaults:{{ item.user.ljust(15) }} {{ item.option }}
+{% elif item.host is defined %}
+Defaults@{{ item.host.ljust(15) }} {{ item.option }}
+{% elif item.command is defined %}
+Defaults!{{ item.command.ljust(15) }} {{ item.option }}
+{% elif item.run_as is defined %}
+Defaults>{{ item.run_as.ljust(15) }} {{ item.option }}
+{% else %}
+Defaults                 {{ item.option }}
+{% endif %}
 {% endfor %}
 
 
 ## Host Aliases
-{% for item in sudoers_host_aliases | default([]) %}
+{% for item in sudoers_host_aliases | default([]) + sudoers_custom_host_aliases | default([]) %}
 # {{ item.name }}
 Host_Alias {{ item.name }} = {{ item.hosts | join(', ') }}
 {% endfor %}
 
 
 ## User Aliases
-{% for item in sudoers_user_aliases | default([]) %}
+{% for item in sudoers_user_aliases | default([]) + sudoers_custom_user_aliases | default([]) %}
 # {{ item.name }}
 User_Alias {{ item.name }} = {{ item.users | join(', ') }}
 {% endfor %}
 
 
 ## Command Aliases
-{% for item in sudoers_cmnd_aliases | default([]) %}
+{% for item in sudoers_cmnd_aliases | default([]) + sudoers_custom_cmnd_aliases | default([]) %}
 # {{ item.name }}
 Cmnd_Alias {{ item.name }} = {{ item.commands | join(', ') }}
 {% endfor %}
@@ -41,7 +51,7 @@ Cmnd_Alias {{ item.name }} = {{ item.commands | join(', ') }}
 ## which machines (the sudoers file can be shared between multiple
 ## systems).
 
-{% for item in sudoers_entries | default([]) %}
+{% for item in sudoers_entries | default([]) + sudoers_custom_entries | default([]) %}
 {{ item.who.ljust(15) }} ALL = ({{ item.as_who | default(['ALL']) | join(', ') }}){% if item.options is defined %}{{ item.options }}:{% endif %} {{ item.commands | join(', ') }}
 {% endfor %}
 

@@ -20,5 +20,15 @@ Cmnd_Alias {{ item.name }} = {{ item.commands | join(', ') }}
 
 ## Custom Defaults
 {% for item in sudoers_d_item.sudoers_defaults | default([]) %}
-Defaults{% if item.user is defined %}:{{ item.user }}{% endif %}    {{ item.option }}
+{% if item.user is defined %}
+Defaults:{{ item.user.ljust(15) }} {{ item.option }}
+{% elif item.host is defined %}
+Defaults@{{ item.host.ljust(15) }} {{ item.option }}
+{% elif item.command is defined %}
+Defaults!{{ item.command.ljust(15) }} {{ item.option }}
+{% elif item.run_as is defined %}
+Defaults>{{ item.run_as.ljust(15) }} {{ item.option }}
+{% else %}
+Defaults                 {{ item.option }}
+{% endif %}
 {% endfor %}
