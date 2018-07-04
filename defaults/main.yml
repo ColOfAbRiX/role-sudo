@@ -39,32 +39,32 @@ sudoers_cmnd_aliases:
 
 # Defaults to add into /etc/sudoers
 sudoers_defaults:
-  #
-  # Disable "ssh hostname sudo <cmd>", because it will show the password in clear.
-  #         You have to run "ssh -t hostname sudo <cmd>".
-  #
+ #
+ # Disable "ssh hostname sudo <cmd>", because it will show the password in clear.
+ #         You have to run "ssh -t hostname sudo <cmd>".
+ #
  - option: 'requiretty'
  - option: '!requiretty'
    user:   root
 
-  #
-  # Refuse to run if unable to disable echo on the tty. This setting should also be
-  # changed in order to be able to use sudo without a tty. See requiretty above.
-  #
+ #
+ # Refuse to run if unable to disable echo on the tty. This setting should also be
+ # changed in order to be able to use sudo without a tty. See requiretty above.
+ #
  - option: '!visiblepw'
 
-  #
-  # Preserving HOME has security implications since many programs
-  # use it when searching for configuration files. Note that HOME
-  # is already set when the the env_reset option is enabled, so
-  # this option is only effective for configurations where either
-  # env_reset is disabled or HOME is present in the env_keep list.
-  #
+ #
+ # Preserving HOME has security implications since many programs
+ # use it when searching for configuration files. Note that HOME
+ # is already set when the the env_reset option is enabled, so
+ # this option is only effective for configurations where either
+ # env_reset is disabled or HOME is present in the env_keep list.
+ #
  - option: 'always_set_home'
 
-  #
-  # Default timeout for sudo password extended to 10 minutes
-  #
+ #
+ # Default timeout for sudo password extended to 10 minutes
+ #
  - option: 'timestamp_timeout=10'
 
  - option: 'secure_path = /sbin:/bin:/usr/sbin:/usr/bin'
@@ -75,14 +75,15 @@ sudoers_defaults:
  - option: 'env_keep += "LC_MONETARY LC_NAME LC_NUMERIC LC_PAPER LC_TELEPHONE"'
  - option: 'env_keep += "LC_TIME LC_ALL LANGUAGE LINGUAS _XKB_CHARSET XAUTHORITY"'
 
-  #
-  # Adding HOME to env_keep may enable a user to run unrestricted
-  # commands via sudo.
-  #
-  #- option: 'env_keep += "HOME"'
+ #
+ # Adding HOME to env_keep may enable a user to run unrestricted
+ # commands via sudo.
+ #
+ #- option: 'env_keep += "HOME"'
 
- - option: '!requiretty'
-   user:  "{{ ansible_common_user }}"
+ # Uncomment this if you use a shared user to run ansible
+ #- option: '!requiretty'
+ #  user:  "{{ ansible_common_user }}"
 
 
 # The custom entries to put into /etc/sudoers
@@ -92,10 +93,11 @@ sudoers_entries:
      as_who:   [ALL]
      commands: [ALL]
 
-   ## Give Ansible user full permissions
-   - who:      "{{ ansible_common_user }}"
-     as_who:   [ALL]
-     commands: [ALL]
+   # # Uncomment this if you use a shared user to run ansible
+   # ## Give Ansible user full permissions
+   # - who:      "{{ ansible_common_user }}"
+   #   as_who:   [ALL]
+   #   commands: [ALL]
 
    ## Allows people in group wheel to run all commands, except for root shells
    - who:      '%wheel'
