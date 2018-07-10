@@ -10,7 +10,10 @@ The role is configured to create the default OS configuration.
 
 ## Requirements
 
-The role requires RHEL/CentOS 7 to work.
+The role requires:
+ - RHEL/CentOS >= 6
+ - Debian >= 7
+ - Ubuntu >= 14
 
 ## Role Variables
 

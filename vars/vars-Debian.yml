@@ -1,0 +1,22 @@
+---
+
+sudoers_os_default_defaults:
+ - option: 'env_reset'
+ - option: 'mail_badpass'
+ - option: 'secure_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin"'
+
+sudoers_os_default_entries:
+ # Allow root to run any commands anywhere, always
+ - who:      root
+   as_who:   [ALL]
+   commands: [ALL]
+
+ # Members of the admin group may gain root privileges
+ - who:      '%admin'
+   as_who:   [ALL]
+   commands: [ALL]
+
+ # Allow members of group sudo to execute any command
+ - who:      '%sudo'
+   as_who:   [ALL]
+   commands: [ALL]

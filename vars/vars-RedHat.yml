@@ -1,0 +1,54 @@
+---
+
+sudoers_os_default_defaults:
+ #
+ # Refuse to run if unable to disable echo on the tty. This setting should also be
+ # changed in order to be able to use sudo without a tty. See requiretty above.
+ #
+ - option: '!visiblepw'
+
+ #
+ # Preserving HOME has security implications since many programs
+ # use it when searching for configuration files. Note that HOME
+ # is already set when the the env_reset option is enabled, so
+ # this option is only effective for configurations where either
+ # env_reset is disabled or HOME is present in the env_keep list.
+ #
+ - option: 'always_set_home'
+ - option: 'match_group_by_gid'
+
+ #
+ # Default timeout for sudo password extended to 10 minutes
+ #
+ - option: 'timestamp_timeout=10'
+
+ - option: 'secure_path = /sbin:/bin:/usr/sbin:/usr/bin'
+ - option: 'env_reset'
+ - option: 'env_keep = "COLORS DISPLAY HOSTNAME HISTSIZE INPUTRC KDEDIR LS_COLORS"'
+ - option: 'env_keep += "MAIL PS1 PS2 QTDIR USERNAME LANG LC_ADDRESS LC_CTYPE"'
+ - option: 'env_keep += "LC_COLLATE LC_IDENTIFICATION LC_MEASUREMENT LC_MESSAGES"'
+ - option: 'env_keep += "LC_MONETARY LC_NAME LC_NUMERIC LC_PAPER LC_TELEPHONE"'
+ - option: 'env_keep += "LC_TIME LC_ALL LANGUAGE LINGUAS _XKB_CHARSET XAUTHORITY"'
+
+ #
+ # Adding HOME to env_keep may enable a user to run unrestricted
+ # commands via sudo.
+ #
+ #- option: 'env_keep += "HOME"'
+
+sudoers_os_default_entries:
+ ## Allow root to run any commands anywhere, always
+ - who:      root
+   as_who:   [ALL]
+   commands: [ALL]
+
+ # # Uncomment this if you use a shared user to run ansible
+ # ## Give Ansible user full permissions
+ # - who:      "{{ ansible_common_user }}"
+ #   as_who:   [ALL]
+ #   commands: [ALL]
+
+ ## Allows people in group wheel to run all commands, except for root shells
+ - who:      '%wheel'
+   as_who:   [ALL]
+   commands: [ALL]
