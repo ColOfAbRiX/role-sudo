@@ -9,7 +9,6 @@
 ##
 ## This file must be edited with the 'visudo' command.
 
-
 ## Defaults specification
 {% for item in sudoers_defaults | default([]) + sudoers_custom_defaults | default([]) %}
 {% if item.user is defined %}
@@ -25,36 +24,30 @@ Defaults                 {{ item.option }}
 {% endif %}
 {% endfor %}
 
-
 ## Host Aliases
 {% for item in sudoers_host_aliases | default([]) + sudoers_custom_host_aliases | default([]) %}
 # {{ item.name }}
-Host_Alias {{ item.name }} = {{ item.hosts | join(', ') }}
+Host_Alias               {{ item.name }} = {{ item.hosts | join(', ') }}
 {% endfor %}
-
 
 ## User Aliases
 {% for item in sudoers_user_aliases | default([]) + sudoers_custom_user_aliases | default([]) %}
 # {{ item.name }}
-User_Alias {{ item.name }} = {{ item.users | join(', ') }}
+User_Alias               {{ item.name }} = {{ item.users | join(', ') }}
 {% endfor %}
-
 
 ## Command Aliases
 {% for item in sudoers_cmnd_aliases | default([]) + sudoers_custom_cmnd_aliases | default([]) %}
 # {{ item.name }}
-Cmnd_Alias {{ item.name }} = {{ item.commands | join(', ') }}
+Cmnd_Alias               {{ item.name }} = {{ item.commands | join(', ') }}
 {% endfor %}
-
 
 ## Next comes the main part: which users can run what software on
 ## which machines (the sudoers file can be shared between multiple
 ## systems).
-
 {% for item in sudoers_entries | default([]) + sudoers_custom_entries | default([]) %}
-{{ item.who.ljust(15) }} ALL = ({{ item.as_who | default(['ALL']) | join(', ') }}){% if item.options is defined %}{{ item.options }}:{% endif %} {{ item.commands | join(', ') }}
+{{ item.who.ljust(23) }} ALL = ({{ item.as_who | default(['ALL']) | join(', ') }}){% if item.options is defined %}{{ item.options }}:{% endif %} {{ item.commands | join(', ') }}
 {% endfor %}
 
-
 ## Read drop-in files from /etc/sudoers.d (the # here does not mean a comment)
-#includedir /etc/sudoers.d
+#includedir {{ sudo_sudoers_d_path }}

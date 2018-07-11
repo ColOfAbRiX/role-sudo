@@ -1,0 +1,18 @@
+---
+
+- name: "Install sudo-ldap"
+  package: name="{{ item }}" state=present
+  with_items:
+   - "{{ sudo_ldap_packages }}"
+
+- name: "sudo-ldap Configuration"
+  template:
+    src:    etc/sudo-ldap.conf.j2
+    dest:   /etc/sudo-ldap.conf
+    owner:  root
+    group:  root
+    mode:   '0440'
+    force:  yes
+    seuser: system_u
+    serole: object_r
+    setype: etc_t

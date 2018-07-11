@@ -3,21 +3,6 @@
 ## Custom SUDO rules "{{ sudoers_d_item.name }}"
 ##
 
-## User Aliases
-{% for item in sudoers_d_item.sudoers_user_aliases | default([]) %}
-User_Alias {{ item.name }} = {{ item.users | join(', ') }}
-{% endfor %}
-
-## Command Aliases
-{% for item in sudoers_d_item.sudoers_cmnd_aliases | default([]) %}
-Cmnd_Alias {{ item.name }} = {{ item.commands | join(', ') }}
-{% endfor %}
-
-## Custom rules
-{% for item in sudoers_d_item.sudoers_entries | default([]) %}
-{{ item.who }}      ALL = ({{ item.as_who | default([ 'ALL' ]) | join(', ') }}){% if item.options is defined %}{{ item.options }}:{% endif %} {{ item.commands | join(', ') }}
-{% endfor %}
-
 ## Custom Defaults
 {% for item in sudoers_d_item.sudoers_defaults | default([]) %}
 {% if item.user is defined %}
@@ -31,4 +16,19 @@ Defaults>{{ item.run_as.ljust(15) }} {{ item.option }}
 {% else %}
 Defaults                 {{ item.option }}
 {% endif %}
+{% endfor %}
+
+## User Aliases
+{% for item in sudoers_d_item.sudoers_user_aliases | default([]) %}
+User_Alias               {{ item.name }} = {{ item.users | join(', ') }}
+{% endfor %}
+
+## Command Aliases
+{% for item in sudoers_d_item.sudoers_cmnd_aliases | default([]) %}
+Cmnd_Alias               {{ item.name }} = {{ item.commands | join(', ') }}
+{% endfor %}
+
+## Custom rules
+{% for item in sudoers_d_item.sudoers_entries | default([]) %}
+{{ item.who }}              ALL = ({{ item.as_who | default([ 'ALL' ]) | join(', ') }}){% if item.options is defined %}{{ item.options }}:{% endif %} {{ item.commands | join(', ') }}
 {% endfor %}

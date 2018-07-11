@@ -7,17 +7,17 @@ sudo_safety_state: 'present'
 sudo_safe_file: /etc/sudo-safe.tar.gz
 
 # Host aliases to add into /etc/sudoers
-sudoers_host_aliases: []
+sudoers_host_aliases: "{{ sudoers_os_default_host_aliases }}"
 # - name: PRODUCTION
 #   hosts: [vmweb01, vmweb02]
 
 # User aliases to add into /etc/sudoers
-sudoers_user_aliases: []
+sudoers_user_aliases: "{{ sudoers_os_default_user_aliases }}"
 # - name: ADMINISTRATORS
 #   hosts: [fabrizio, luis]
 
 # Command aliases to add into /etc/sudoers
-sudoers_cmnd_aliases: []
+sudoers_cmnd_aliases: "{{ sudoers_os_default_cmnd_aliases }}"
 # - name: SHELLS
 #   commands:
 #    - /usr/bin/bash
@@ -51,6 +51,8 @@ sudoers_entries: "{{ sudoers_os_default_entries }}"
 #   commands:
 #    - 'ALL'
 
+# Path of the sudoers directory
+sudo_sudoers_d_path: /etc/sudoers.d
 
 # Custom files into /etc/sudoers.d
 sudoers_sudoers_d: []
@@ -73,6 +75,9 @@ sudoers_sudoers_d: []
 #
 # /etc/sudo-ldap.conf
 #
+
+# If set to true it will enable support for sudo-ldap
+sudo_ldap_support: false
 
 # Specifies a whitespace-delimited list of one or more URIs describing the LDAP
 # server(s) to connect to.  The protocol may be either ldap ldaps, the latter

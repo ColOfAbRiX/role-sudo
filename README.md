@@ -6,12 +6,14 @@ The role is fully generic and supports all the Sudo settings plus some more beha
 
 The role supports drop-in files inside `/etc/sudoers.d` directory that allows to keep a default system configuration and a custom configuration based on files.
 
-The role is configured to create the default OS configuration.
+Without any specific setting the role creates the default OS configuration.
 
 ## Requirements
 
-The role requires:
- - RHEL/CentOS >= 6
+The role supports the following Linux distributions:
+
+ - RedHat >= 6
+ - CentOS >= 6
  - Debian >= 7
  - Ubuntu >= 14
 
@@ -19,25 +21,27 @@ The role requires:
 
 The variables are fully documented in the [default configuration](defaults/main.yml) file, including their default values and some examples. This file contains all the settings that can be configured.
 
-Please refer to the default configuration file for the full list and use Linux man pages if you need more information on Sudo.
+Please refer to the default configuration file for the full list and use Linux man pages if you need more information on Sudo,
 
 | Variable               | Default                 | Description                                  |
 | :---                   | :---                    | :---                                         |
 | `sudo_safety_state`    | `present`               | If 'present' it will create a safety system that replaces wrong sudo files. |
 | `sudo_safe_file`       | `/etc/sudo-safe.tar.gz` | Name of the backup file.                     |
+| `sudo_ldap_*`          |                         | Set of variables to configure SUDO-LDAP. See `man sudo-ldap.conf` |
+| `sudo_sudoers_d_path`  | `/etc/sudoers.d`        | Path of the sudoers directory                |
+| `sudo_ldap_support`    | `false`                 | Enables the support for SUDO-LDAP            |
 | `sudoers_host_aliases` | `[]`                    | Host aliases to add into /etc/sudoers.       |
 | `sudoers_user_aliases` | `[]`                    | User aliases to add into /etc/sudoers.       |
 | `sudoers_cmnd_aliases` | `...`                   | Command aliases to add into /etc/sudoers.    |
 | `sudoers_defaults`     | `...`                   | Defaults to add into /etc/sudoers.           |
 | `sudoers_entries`      | `...`                   | The custom entries to put into /etc/sudoers. |
 | `sudoers_sudoers_d`    | `[]`                    | Custom files into /etc/sudoers.d.            |
-| `sudo_ldap_*`          |                         | Set of variables to configure SUDO-LDAP. See `man sudo-ldap.conf` |
 
 ### Custom sudoers file
 
 The `sudoers_sudoers_d` variable contains the configuration for additional sudoers files placed under `/etc/sudoers.d`.
 
-The variable is a list where each element can contain the same `sudoers_*` variables. The following is an example of a custom sudo file:
+The variable is a list where each element can contain the same `sudoers_*` variables as the main sudo configuration. The following is an example of a custom sudo file named `/etc/sudoers.d/developers`:
 
 ```Yaml
 sudoers_sudoers_d:
@@ -57,7 +61,8 @@ sudoers_sudoers_d:
 
 ### Additional configuration values
 
-Each `sudoers_*` variable has a partner variable named `sudoers_custom_*` that is added to it. This allows to maintain a global configuration while still be able to add global customizations.
+Each `sudoers_*` variable has a partner variable named `sudoers_custom_*` that is added to the configuration before the sudo output files are created.
+This allows to maintain a global configuration while still be able to add customizations.
 
 ### SUDO-LDAP
 

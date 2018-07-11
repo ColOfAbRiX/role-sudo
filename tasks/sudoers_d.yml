@@ -1,0 +1,35 @@
+---
+
+- name: "sudoers.d Directory"
+  file:
+    path:    "{{ sudo_sudoers_d_path }}"
+    state:   directory
+    owner:   root
+    group:   root
+    mode:    '0750'
+    seuser:  system_u
+    serole:  object_r
+    setype:  etc_t
+
+- name: "Add sudoers.d Configuration Files"
+  template:
+    src:    "etc/sudoers.d/generic.j2"
+    dest:   "{{ sudo_sudoers_d_path }}/{{ sudoers_d_item.name }}"
+    owner:  root
+    group:  root
+    mode:   '0440'
+    force:  yes
+    seuser: system_u
+    serole: object_r
+    setype: etc_t
+  when: sudoers_d_item.state | default('present') == 'present'
+  with_items:
+   - "{{ sudoers_sudoers_d }}"
+  loop_control:
+    loop_var: sudoers_d_item
+
+- name: "Remove sudoers.d Configuration Files"
+  file: path="{{ sudo_sudoers_d_path }}/{{ item.name }}" state=absent
+  when: item.state | default('present') == 'absent'
+  with_items:
+   - "{{ sudoers_sudoers_d }}"
